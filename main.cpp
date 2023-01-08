@@ -5,14 +5,15 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <memory.h>
 
 #pragma pack(1)
 
 struct ieee80211_radiotap_header {
-    u_int8_t        it_version;     /* set to 0 */
+    u_int8_t        it_version;
     u_int8_t        it_pad;
-    u_int16_t       it_len;         /* entire length */
-    u_int32_t       it_present;     /* fields present */
+    u_int16_t       it_len;
+    u_int32_t       it_present;
 } __attribute__((__packed__));
 
 struct ieee80211_beacon_frame_header {
@@ -28,7 +29,6 @@ struct ieee80211_wireless_management_header {
 	uint64_t timestamp;
 	uint16_t beacon_interval;
 	uint16_t capabilities_information;
-	uint8_t tagged_params_start;
 } __attribute__((__packed__));
 
 void dump(void* p, size_t n) {
@@ -104,6 +104,63 @@ int main(int argc, char* argv[]) {
 		if (pkthdr_beacon_frame_header->it_frame_control_field != 0x0080){
 			continue;
 		}
+
+		size_t present_count = 1;
+		void* start_present = &(pkthdr_radiotap->it_present);
+		void* current_present = start_present;
+		while (true)
+		{
+			if (*(uint32_t*)(current_present) >> 31 == 0){
+				break;
+			}
+			uint8_t present_channel_flag = (*(uint32_t*)(current_present) >> 3) % 2;
+			current_present = current_present + sizeof(uint32_t);
+			present_count++;
+		}
+
+		size_t present_padding_size = 4 * ((present_count - 1) % 2);
+		size_t present_total_size = 4 * (present_count) + present_padding_size;
+		size_t length_from_present_to_channel = present_total_size;
+
+		const size_t radiotap_TSFT_size = 8;
+		const size_t radiotap_Flags_size = 1;
+		const size_t radiotap_Rate_size = 1;
+
+		// TSFT check
+		if ((*(uint32_t*)(start_present) >> 0) % 2 == 1)
+		{
+			length_from_present_to_channel += radiotap_TSFT_size;
+		}
+
+		// Flags check
+		if ((*(uint32_t*)(start_present) >> 1) % 2 == 1)
+		{
+			length_from_present_to_channel += radiotap_Flags_size;
+		}
+
+		// Rate check
+		if ((*(uint32_t*)(start_present) >> 2) % 2 == 1)
+		{
+			length_from_present_to_channel += radiotap_Rate_size;
+		}
+		
+		uint16_t channel_frequency = *(uint16_t*)(start_present + length_from_present_to_channel);
+		uint16_t channel_flags = *(uint16_t*)(start_present + length_from_present_to_channel + sizeof(uint16_t));
+		
+		// GHz check
+		bool is_2ghz = (channel_flags >> 7) % 2;
+		bool is_5ghz = (channel_flags >> 8) % 2;
+		if (is_2ghz)
+		{
+			printf("This is 2GHz.\n");
+		}
+		if (is_5ghz)
+		{
+			printf("This is 5GHz.\n");
+		}
+		
+
+		// 5GHz check
 		
 		printf("[%d] Beacon Packet Information\n", beacon_count);
 		printf("\tBSSID: ");
@@ -111,12 +168,18 @@ int main(int argc, char* argv[]) {
 		
 		printf("\tSSID: ");
 		const size_t fixed_params_size = 12;
+		const size_t tag_number_size = 1;
+		const size_t tag_length_size = 1;
 		struct ieee80211_wireless_management_header* pkthdr_beacon_management_header = (struct ieee80211_wireless_management_header*)(packet + pkthdr_radiotap->it_len + sizeof(struct ieee80211_beacon_frame_header));
 		void* wireless_management_header = pkthdr_beacon_management_header;
-		size_t ssid_length = *(uint8_t*)(wireless_management_header + fixed_params_size + 1);
+		size_t ssid_length = *(uint8_t*)(wireless_management_header + fixed_params_size + tag_number_size);
+
+		char* ssid_str = (char*)malloc(sizeof(char) * ssid_length);
+		memcpy(ssid_str, (uint8_t*)(wireless_management_header + fixed_params_size + tag_number_size + tag_length_size), ssid_length);
+		printf("%s\n", ssid_str);
 		for (size_t i = 0; i < ssid_length; i++)
 		{
-			printf("%c", *(uint8_t*)(wireless_management_header + fixed_params_size + 2 + i));
+			printf("%c", *(uint8_t*)(wireless_management_header + fixed_params_size + tag_number_size + tag_length_size + i));
 		}
 		printf("\n\n");
 		beacon_count++;
