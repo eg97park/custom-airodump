@@ -43,16 +43,11 @@ void dump(void* p, size_t n) {
 	printf("\n");
 }
 
-void print_mac_address(void* p) {
-	size_t mac_address_size = 6;
+char* parse_mac_addr(void* p) {
 	uint8_t* u8 = static_cast<uint8_t*>(p);
-	size_t i = 0;
-	while (true) {
-		printf("%02X", *u8++);
-		if (i != mac_address_size - 1) printf(":");
-		if (++i >= mac_address_size) break;
-	}
-	printf("\n");
+	char* buffer = (char*)malloc(sizeof(char) * 18);
+	snprintf(buffer, 18, "%02X:%02X:%02X:%02X:%02X:%02X", u8[0], u8[1], u8[2], u8[3], u8[4], u8[5]);
+	return buffer;
 }
 
 void usage(char* argv[]) {
@@ -77,6 +72,27 @@ bool parse(Param* param, int argc, char* argv[]) {
 	return true;
 }
 
+// https://biig.tistory.com/84
+int parse_frequency(int frequency){
+	if(frequency >= 2412 && frequency <= 2484) {
+		if (frequency == 2484)
+			return (frequency - 2412) / 5;
+		return (frequency - 2412) / 5 + 1;
+	}
+	else if(frequency >= 5170 && frequency <= 5825) {
+		return (frequency - 5170) / 5 + 34;
+	}
+	else {
+		return -1;
+	}
+}
+
+void print_info(int frequency, char* bssid, int beacons, char* essid) {
+	int channel = parse_frequency(frequency);
+	printf("%d\t%s\t%d\t%dGHz\t\t%s\n", channel, bssid, beacons, frequency, essid);
+	return;
+}
+
 int main(int argc, char* argv[]) {
 	if (!parse(&param, argc, argv))
 		return -1;
@@ -89,6 +105,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	int beacon_count = 1;
+	printf("CHANNEL\tBSSID\t\t\tBeacons\tFrequency\tESSID\n");
 	while (true) {
 		struct pcap_pkthdr* header;
 		const u_char* packet;
@@ -144,29 +161,19 @@ int main(int argc, char* argv[]) {
 			length_from_present_to_channel += radiotap_Rate_size;
 		}
 		
+		dump(start_present, length_from_present_to_channel);
 		uint16_t channel_frequency = *(uint16_t*)(start_present + length_from_present_to_channel);
 		uint16_t channel_flags = *(uint16_t*)(start_present + length_from_present_to_channel + sizeof(uint16_t));
+		dump(&channel_frequency, sizeof(uint16_t));
+		dump(&channel_flags, sizeof(uint16_t));
 		
 		// GHz check
+		/*
 		bool is_2ghz = (channel_flags >> 7) % 2;
 		bool is_5ghz = (channel_flags >> 8) % 2;
-		if (is_2ghz)
-		{
-			printf("This is 2GHz.\n");
-		}
-		if (is_5ghz)
-		{
-			printf("This is 5GHz.\n");
-		}
+		*/
+		char* bssid_str = parse_mac_addr(pkthdr_beacon_frame_header->it_bss_id);
 		
-
-		// 5GHz check
-		
-		printf("[%d] Beacon Packet Information\n", beacon_count);
-		printf("\tBSSID: ");
-		print_mac_address(pkthdr_beacon_frame_header->it_bss_id);
-		
-		printf("\tSSID: ");
 		const size_t fixed_params_size = 12;
 		const size_t tag_number_size = 1;
 		const size_t tag_length_size = 1;
@@ -176,12 +183,7 @@ int main(int argc, char* argv[]) {
 
 		char* ssid_str = (char*)malloc(sizeof(char) * ssid_length);
 		memcpy(ssid_str, (uint8_t*)(wireless_management_header + fixed_params_size + tag_number_size + tag_length_size), ssid_length);
-		printf("%s\n", ssid_str);
-		for (size_t i = 0; i < ssid_length; i++)
-		{
-			printf("%c", *(uint8_t*)(wireless_management_header + fixed_params_size + tag_number_size + tag_length_size + i));
-		}
-		printf("\n\n");
+		print_info(channel_frequency, bssid_str, beacon_count, ssid_str);
 		beacon_count++;
 	}
 
