@@ -7,14 +7,10 @@
 #include <stdlib.h>
 #include <memory.h>
 
-#pragma pack(1)
+#include "tools.h"
+#include "RadiotapParser.h"
 
-struct ieee80211_radiotap_header {
-    u_int8_t        it_version;
-    u_int8_t        it_pad;
-    u_int16_t       it_len;
-    u_int32_t       it_present;
-} __attribute__((__packed__));
+#pragma pack(1)
 
 struct ieee80211_beacon_frame_header {
     uint16_t		it_frame_control_field;
@@ -30,18 +26,6 @@ struct ieee80211_wireless_management_header {
 	uint16_t beacon_interval;
 	uint16_t capabilities_information;
 } __attribute__((__packed__));
-
-void dump(void* p, size_t n) {
-	uint8_t* u8 = static_cast<uint8_t*>(p);
-	size_t i = 0;
-	while (true) {
-		printf("%02X ", *u8++);
-		if (++i >= n) break;
-		if (i % 8 == 0) printf(" ");
-		if (i % 16 == 0) printf("\n");
-	}
-	printf("\n");
-}
 
 char* parse_mac_addr(void* p) {
 	uint8_t* u8 = static_cast<uint8_t*>(p);
@@ -124,6 +108,11 @@ int main(int argc, char* argv[]) {
 
 		size_t present_count = 1;
 		void* start_present = &(pkthdr_radiotap->it_present);
+		RadiotapParser rtparser = RadiotapParser((void*)packet);
+		printf("hdr_ver=%d\n", rtparser.get_header_version());
+		printf("hdr_pad=%d\n", rtparser.get_header_padding());
+		printf("hdr_len=%d\n", rtparser.get_header_length());
+		printf("first_present=%08x\n", rtparser.get_first_present());
 		void* current_present = start_present;
 		while (true)
 		{
@@ -161,11 +150,11 @@ int main(int argc, char* argv[]) {
 			length_from_present_to_channel += radiotap_Rate_size;
 		}
 		
-		dump(start_present, length_from_present_to_channel);
+		//dump(start_present, length_from_present_to_channel);
 		uint16_t channel_frequency = *(uint16_t*)(start_present + length_from_present_to_channel);
 		uint16_t channel_flags = *(uint16_t*)(start_present + length_from_present_to_channel + sizeof(uint16_t));
-		dump(&channel_frequency, sizeof(uint16_t));
-		dump(&channel_flags, sizeof(uint16_t));
+		//dump(&channel_frequency, sizeof(uint16_t));
+		//dump(&channel_flags, sizeof(uint16_t));
 		
 		// GHz check
 		/*
