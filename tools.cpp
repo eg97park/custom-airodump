@@ -7,6 +7,7 @@ void usage(char* argv[])
 	printf("sample: %s wlp45s0\n", argv[0]);
 }
 
+
 bool parse(Param* param, int argc, char* argv[])
 {
 	if (argc != 2) {
@@ -17,7 +18,7 @@ bool parse(Param* param, int argc, char* argv[])
 	return true;
 }
 
-// https://gitlab.com/gilgil/sns/-/wikis/byte-order/byte-order
+
 void dump(void* p, size_t n)
 {
 	uint8_t* u8 = static_cast<uint8_t*>(p);
@@ -31,7 +32,7 @@ void dump(void* p, size_t n)
 	printf("\n");
 }
 
-// https://biig.tistory.com/84
+
 int parse_frequency(int frequency)
 {
 	if(frequency >= 2412 && frequency <= 2484) {
@@ -47,6 +48,7 @@ int parse_frequency(int frequency)
 	}
 }
 
+
 char* parse_mac_addr(void* p)
 {
 	uint8_t* u8 = static_cast<uint8_t*>(p);
@@ -55,9 +57,9 @@ char* parse_mac_addr(void* p)
 	return buffer;
 }
 
-void print_info(char* bssid, int pwr, int beacons, int ch, char* essid)
+
+void print_info(char* bssid, int pwr, int beacons, int ch, int freq, char* essid)
 {
-	printf("%s\t%d\t%d\t%d\t%s\n", bssid, pwr, beacons, ch, essid);
+	printf("%s\t%ddbm\t%d\t%d\t%dGHz\t%s\n", bssid, pwr, beacons, ch, freq, essid);
 	return;
 }
-
