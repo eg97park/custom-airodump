@@ -23,8 +23,8 @@
     * [x] beacon-a2000ua-testap5g.pcap
     * [x] beacon-awus051nh-testap.pcap
     * [x] beacon-awus051nh-testap5g.pcap
-    * [ ] beacon-forcerecon-testap.pcap
-    * [ ] beacon-forcerecon-testap5g.pcap
+    * [x] beacon-forcerecon-testap.pcap
+    * [x] beacon-forcerecon-testap5g.pcap
     * [x] beacon-galaxy7-testap.pcap
     * [x] beacon-galaxy7-testap5g.pcap
     * [x] beacon-nexus5-testap.pcap
