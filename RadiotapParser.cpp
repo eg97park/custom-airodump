@@ -37,7 +37,35 @@ uint32_t RadiotapParser::get_first_present()
     return first_present;
 }
 
-uint32_t* RadiotapParser::get_presents()
+/**
+ * present 필드 뒤에 오는 radiotap data의 경우,
+ * 크기에 따라 패딩 길이가 달라짐.
+ * 
+ * 만약 MAC timestamp와 같이 8bytes 크기 필드가 온다면,
+ * 8bytes 단위부터 시작해야 함.
+ * 예제: 80211-sample.pcap
+ *  MAC timestamp -> Flags -> ...
+ * 
+ * 만약 Flags와 같이 4bytes 크기 필드가 온다면,
+ * 4bytes 단위부터 시작해야 함.
+ * 예제: 80211-sample1.pcap
+ *  Flags -> ...
+*/
+std::vector<uint32_t> RadiotapParser::get_presents()
 {
-    return nullptr;
+
+    std::vector<uint32_t> presents_vals;
+    uint32_t* present_addr = (uint32_t*)(this->hdr_pst_addr);
+    size_t presents_count = 1;
+    while (true)
+    {
+        presents_vals.push_back(*present_addr);
+        if ((*present_addr) >> 31 == 0)
+        {
+            break;
+        }
+        presents_count++;
+        present_addr = present_addr + 1;
+    }
+    return presents_vals;
 }

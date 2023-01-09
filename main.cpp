@@ -10,8 +10,6 @@
 #include "tools.h"
 #include "RadiotapParser.h"
 
-#pragma pack(1)
-
 int main(int argc, char* argv[]) {
 	Param param = {
 		.dev_ = NULL
@@ -39,8 +37,8 @@ int main(int argc, char* argv[]) {
 			break;
 		}
 
-		struct ieee80211_radiotap_header* pkthdr_radiotap = (struct ieee80211_radiotap_header*)packet;
-		struct ieee80211_beacon_frame_header* pkthdr_beacon_frame_header = (struct ieee80211_beacon_frame_header*)(packet + pkthdr_radiotap->it_len);
+		dot11_radio_hdr* pkthdr_radiotap = (dot11_radio_hdr*)packet;
+		dot11_beacon_hdr* pkthdr_beacon_frame_header = (dot11_beacon_hdr*)(packet + pkthdr_radiotap->it_len);
 		if (pkthdr_beacon_frame_header->it_frame_control_field != 0x0080){
 			continue;
 		}
@@ -48,10 +46,19 @@ int main(int argc, char* argv[]) {
 		size_t present_count = 1;
 		void* start_present = &(pkthdr_radiotap->it_present);
 		RadiotapParser rtparser = RadiotapParser((void*)packet);
-		printf("hdr_ver=%d\n", rtparser.get_header_version());
-		printf("hdr_pad=%d\n", rtparser.get_header_padding());
-		printf("hdr_len=%d\n", rtparser.get_header_length());
-		printf("first_present=%08x\n", rtparser.get_first_present());
+		if (rtparser.get_header_length() == 13){
+			continue;
+		}
+
+		//printf("dump((void*)packet)\n");
+		//dump((void*)packet, rtparser.get_header_length());
+		printf("hdr_ver=%d\thdr_pad=%d\thdr_len=%d\tfirst_present=%08x\n", rtparser.get_header_version(), rtparser.get_header_padding(), rtparser.get_header_length(), rtparser.get_first_present());
+		std::vector<uint32_t> presents_vector = rtparser.get_presents();
+		for (std::vector<uint32_t>::iterator it = presents_vector.begin(); it != presents_vector.end(); it++)
+		{
+			printf("present[%d] = %08x\n", it - presents_vector.begin(), *it);
+		}
+		
 		void* current_present = start_present;
 		while (true)
 		{
@@ -105,7 +112,7 @@ int main(int argc, char* argv[]) {
 		const size_t fixed_params_size = 12;
 		const size_t tag_number_size = 1;
 		const size_t tag_length_size = 1;
-		struct ieee80211_wireless_management_header* pkthdr_beacon_management_header = (struct ieee80211_wireless_management_header*)(packet + pkthdr_radiotap->it_len + sizeof(struct ieee80211_beacon_frame_header));
+		dot11_wlan_mng_hdr* pkthdr_beacon_management_header = (dot11_wlan_mng_hdr*)(packet + pkthdr_radiotap->it_len + sizeof(struct ieee80211_beacon_frame_header));
 		void* wireless_management_header = pkthdr_beacon_management_header;
 		size_t ssid_length = *(uint8_t*)(wireless_management_header + fixed_params_size + tag_number_size);
 
