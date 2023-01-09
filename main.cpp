@@ -25,8 +25,13 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	int beacon_count = 1;
+	const uint8_t fixed_params_size = 12;
+	const uint8_t tag_number_size = 1;
+	const uint8_t tag_length_size = 1;
+
 	printf("BSSID\t\t\tPWR\tBEACONS\tCH\tESSID\n");
+	
+	int beacon_count = 1;
 	while (true) {
 		struct pcap_pkthdr* header;
 		const u_char* packet;
@@ -71,9 +76,6 @@ int main(int argc, char* argv[]) {
 		
 		char* bssid_str = parse_mac_addr(pkthdr_beacon_frame_header->it_bss_id);
 		
-		const uint8_t fixed_params_size = 12;
-		const uint8_t tag_number_size = 1;
-		const uint8_t tag_length_size = 1;
 		dot11_whdr* pkthdr_beacon_management_header = (dot11_whdr*)(packet + pkthdr_radiotap->it_len + sizeof(dot11_bhdr));
 		uint8_t* wireless_management_header = (uint8_t*)pkthdr_beacon_management_header;
 		uint8_t ssid_length = *(wireless_management_header + fixed_params_size + tag_number_size);
