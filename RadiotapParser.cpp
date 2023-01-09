@@ -1,11 +1,12 @@
 #include "RadiotapParser.h"
 #include "tools.h"
 
+
 RadiotapParser::RadiotapParser(void* _pkt_addr)
 {
     this->pkt_addr = _pkt_addr;
 
-    dot11_radio_hdr* hdr = (dot11_radio_hdr*)this->pkt_addr;
+    dot11_rhdr* hdr = (dot11_rhdr*)this->pkt_addr;
     this->hdr_ver = hdr->it_version;
     this->hdr_pad = hdr->it_pad;
     this->hdr_len = hdr->it_len;
@@ -53,7 +54,6 @@ uint32_t RadiotapParser::get_first_present()
 */
 std::vector<uint32_t> RadiotapParser::get_presents()
 {
-
     std::vector<uint32_t> presents_vals;
     uint32_t* present_addr = (uint32_t*)(this->hdr_pst_addr);
     size_t presents_count = 1;
@@ -68,4 +68,15 @@ std::vector<uint32_t> RadiotapParser::get_presents()
         present_addr = present_addr + 1;
     }
     return presents_vals;
+}
+
+std::map<dot11_relem_enum, uint64_t> RadiotapParser::get_radiotap_data_map()
+{
+    if (!this->rtap_data_map.empty())
+    {
+        return this->rtap_data_map;
+    }
+    /* Do something... */
+
+    return this->rtap_data_map;
 }
