@@ -37,3 +37,7 @@ uint32_t RadiotapParser::get_first_present()
     return first_present;
 }
 
+uint32_t* RadiotapParser::get_presents()
+{
+    return nullptr;
+}
