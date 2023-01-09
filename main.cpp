@@ -37,8 +37,8 @@ int main(int argc, char* argv[]) {
 			break;
 		}
 
-		dot11_radio_hdr* pkthdr_radiotap = (dot11_radio_hdr*)packet;
-		dot11_beacon_hdr* pkthdr_beacon_frame_header = (dot11_beacon_hdr*)(packet + pkthdr_radiotap->it_len);
+		dot11_rhdr* pkthdr_radiotap = (dot11_rhdr*)packet;
+		dot11_bhdr* pkthdr_beacon_frame_header = (dot11_bhdr*)(packet + pkthdr_radiotap->it_len);
 		if (pkthdr_beacon_frame_header->it_frame_control_field != 0x0080){
 			continue;
 		}
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
 		const size_t fixed_params_size = 12;
 		const size_t tag_number_size = 1;
 		const size_t tag_length_size = 1;
-		dot11_wlan_mng_hdr* pkthdr_beacon_management_header = (dot11_wlan_mng_hdr*)(packet + pkthdr_radiotap->it_len + sizeof(struct ieee80211_beacon_frame_header));
+		dot11_whdr* pkthdr_beacon_management_header = (dot11_whdr*)(packet + pkthdr_radiotap->it_len + sizeof(struct ieee80211_beacon_frame_header));
 		void* wireless_management_header = pkthdr_beacon_management_header;
 		size_t ssid_length = *(uint8_t*)(wireless_management_header + fixed_params_size + tag_number_size);
 
