@@ -42,10 +42,10 @@ typedef enum ieee80211_radiotap_presence {
 
 static const size_t dot11_relem_size[32] = {
     8, 1, 1, 4, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1,
-    NULL,
+    0,
     3, 8, 12, 12,
-    NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL
+    0, 0, 0, 0, 0, 0,
+    0, 0, 0
 };
 
 typedef struct ieee80211_radiotap_header {
@@ -73,16 +73,16 @@ typedef struct ieee80211_wireless_management_header {
 class RadiotapParser
 {
 private:
-    void* pkt_addr;
+    uint8_t* pkt_addr;
     uint8_t hdr_ver;
     uint8_t hdr_pad;
     uint16_t hdr_len;
-    void* hdr_pst_addr;
+    uint8_t* hdr_pst_addr;
     uint32_t* presents;
     std::vector<uint32_t> rtap_present_vector;
     std::map<dot11_relem_enum, uint64_t> rtap_data_map;
 public:
-    RadiotapParser(void* _radiotap_header_addr);
+    RadiotapParser(uint8_t* _radiotap_header_addr);
     ~RadiotapParser();
     uint8_t get_header_version();
     uint8_t get_header_padding();

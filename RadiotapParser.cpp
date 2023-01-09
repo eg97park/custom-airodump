@@ -2,7 +2,7 @@
 #include "tools.h"
 
 
-RadiotapParser::RadiotapParser(void* _pkt_addr)
+RadiotapParser::RadiotapParser(uint8_t* _pkt_addr)
 {
     this->pkt_addr = _pkt_addr;
 
@@ -10,7 +10,7 @@ RadiotapParser::RadiotapParser(void* _pkt_addr)
     this->hdr_ver = hdr->it_version;
     this->hdr_pad = hdr->it_pad;
     this->hdr_len = hdr->it_len;
-    this->hdr_pst_addr = &(hdr->it_present);
+    this->hdr_pst_addr = (uint8_t*)(&(hdr->it_present));
 }
 
 RadiotapParser::~RadiotapParser()
@@ -59,17 +59,18 @@ std::vector<uint32_t> RadiotapParser::get_presents()
         return this->rtap_present_vector;
     }
 
-    uint32_t* present_addr = (uint32_t*)(this->hdr_pst_addr);
+    uint8_t* present_addr = this->hdr_pst_addr;
     size_t presents_count = 1;
     while (true)
     {
-        this->rtap_present_vector.push_back(*present_addr);
-        if ((*present_addr) >> 31 == 0)
+        uint32_t present_value = *(uint32_t*)present_addr;
+        this->rtap_present_vector.push_back(present_value);
+        if (present_value >> IEEE80211_RADIOTAP_EXT == 0)
         {
             break;
         }
         presents_count++;
-        present_addr = present_addr + 1;
+        present_addr = present_addr + sizeof(uint32_t);
     }
     return this->rtap_present_vector;
 }
@@ -104,9 +105,10 @@ std::map<dot11_relem_enum, uint64_t> RadiotapParser::get_radiotap_data_map()
 	}
 
     //it - bit_sequence_vector.begin()
-    size_t addr_gap = (sizeof(((dot11_rhdr*)0)->it_version) + sizeof(((dot11_rhdr*)0)->it_pad) + sizeof(((dot11_rhdr*)0)->it_len) + (this->rtap_present_vector.size() * sizeof(uint32_t)));
-    void* last_accessed_addr = this->pkt_addr + addr_gap;
-    printf("addr_gap=%ld\n", addr_gap);
+    uint8_t addr_gap = (sizeof(((dot11_rhdr*)0)->it_version) + sizeof(((dot11_rhdr*)0)->it_pad) + sizeof(((dot11_rhdr*)0)->it_len) + (this->rtap_present_vector.size() * sizeof(uint32_t)));
+    //void* last_accessed_addr = this->pkt_addr + addr_gap;
+    uint8_t* last_accessed_addr = this->pkt_addr + addr_gap;
+    printf("addr_gap=%d\n", addr_gap);
 	for (std::vector<dot11_relem_enum>::iterator it = bit_sequence_vector.begin(); it != bit_sequence_vector.end(); it++)
 	{
         /*
@@ -121,11 +123,11 @@ std::map<dot11_relem_enum, uint64_t> RadiotapParser::get_radiotap_data_map()
         13      4       3       
         13      8       3       
         */
-        size_t relem_size = dot11_relem_size[it - bit_sequence_vector.begin()];
+        uint8_t relem_size = dot11_relem_size[it - bit_sequence_vector.begin()];
         if (addr_gap % relem_size != 0)
         {
-            size_t pad_size_cand = relem_size - (addr_gap % relem_size);
-            printf("padding needed at %ld, amount=%ld\n", *it, pad_size_cand);
+            uint8_t pad_size_cand = relem_size - (addr_gap % relem_size);
+            printf("padding needed at %d, amount=%d\n", *it, pad_size_cand);
             addr_gap = addr_gap + pad_size_cand;
         }
         else
@@ -134,7 +136,7 @@ std::map<dot11_relem_enum, uint64_t> RadiotapParser::get_radiotap_data_map()
         }
         
         
-        printf("@\t%ld\t:%ld\n", *it, relem_size);
+        printf("@\t%d\t:%d\n", *it, relem_size);
 	}
     
     

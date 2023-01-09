@@ -43,9 +43,9 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 
-		size_t present_count = 1;
-		void* start_present = &(pkthdr_radiotap->it_present);
-		RadiotapParser rtparser = RadiotapParser((void*)packet);
+		uint8_t present_count = 1;
+		uint8_t* start_present = (uint8_t*)(&(pkthdr_radiotap->it_present));
+		RadiotapParser rtparser = RadiotapParser((uint8_t*)packet);
 		if (rtparser.get_header_length() == 13){
 			continue;
 		}
@@ -60,39 +60,40 @@ int main(int argc, char* argv[]) {
 		}
 		rtparser.get_radiotap_data_map();
 		
-		void* current_present = start_present;
+		uint8_t* current_present = start_present;
 		while (true)
 		{
-			if (*(uint32_t*)(current_present) >> 31 == 0){
+			uint32_t current_present_value = *(uint32_t*)(current_present);
+			if (current_present_value >> IEEE80211_RADIOTAP_EXT == 0){
 				break;
 			}
-			uint8_t present_channel_flag = (*(uint32_t*)(current_present) >> 3) % 2;
+			uint8_t present_channel_flag = (current_present_value >> IEEE80211_RADIOTAP_CHANNEL) % 2;
 			current_present = current_present + sizeof(uint32_t);
 			present_count++;
 		}
 
-		size_t present_padding_size = 4 * ((present_count - 1) % 2);
-		size_t present_total_size = 4 * (present_count) + present_padding_size;
-		size_t length_from_present_to_channel = present_total_size;
+		uint8_t present_padding_size = 4 * ((present_count - 1) % 2);
+		uint8_t present_total_size = 4 * (present_count) + present_padding_size;
+		uint8_t length_from_present_to_channel = present_total_size;
 
-		const size_t radiotap_TSFT_size = 8;
-		const size_t radiotap_Flags_size = 1;
-		const size_t radiotap_Rate_size = 1;
+		const uint8_t radiotap_TSFT_size = 8;
+		const uint8_t radiotap_Flags_size = 1;
+		const uint8_t radiotap_Rate_size = 1;
 
 		// TSFT check
-		if ((*(uint32_t*)(start_present) >> 0) % 2 == 1)
+		if ((*(uint32_t*)(start_present) >> IEEE80211_RADIOTAP_TSFT) % 2 == 1)
 		{
 			length_from_present_to_channel += radiotap_TSFT_size;
 		}
 
 		// Flags check
-		if ((*(uint32_t*)(start_present) >> 1) % 2 == 1)
+		if ((*(uint32_t*)(start_present) >> IEEE80211_RADIOTAP_FLAGS) % 2 == 1)
 		{
 			length_from_present_to_channel += radiotap_Flags_size;
 		}
 
 		// Rate check
-		if ((*(uint32_t*)(start_present) >> 2) % 2 == 1)
+		if ((*(uint32_t*)(start_present) >> IEEE80211_RADIOTAP_RATE) % 2 == 1)
 		{
 			length_from_present_to_channel += radiotap_Rate_size;
 		}
@@ -110,12 +111,12 @@ int main(int argc, char* argv[]) {
 		*/
 		char* bssid_str = parse_mac_addr(pkthdr_beacon_frame_header->it_bss_id);
 		
-		const size_t fixed_params_size = 12;
-		const size_t tag_number_size = 1;
-		const size_t tag_length_size = 1;
+		const uint8_t fixed_params_size = 12;
+		const uint8_t tag_number_size = 1;
+		const uint8_t tag_length_size = 1;
 		dot11_whdr* pkthdr_beacon_management_header = (dot11_whdr*)(packet + pkthdr_radiotap->it_len + sizeof(struct ieee80211_beacon_frame_header));
-		void* wireless_management_header = pkthdr_beacon_management_header;
-		size_t ssid_length = *(uint8_t*)(wireless_management_header + fixed_params_size + tag_number_size);
+		uint8_t* wireless_management_header = (uint8_t*)pkthdr_beacon_management_header;
+		uint8_t ssid_length = *(wireless_management_header + fixed_params_size + tag_number_size);
 
 		char* ssid_str = (char*)malloc(sizeof(char) * ssid_length);
 		memcpy(ssid_str, (uint8_t*)(wireless_management_header + fixed_params_size + tag_number_size + tag_length_size), ssid_length);
