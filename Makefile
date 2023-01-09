@@ -1,4 +1,4 @@
-TARGET=custom-airodump
+TARGET=airodump
 LDLIBS += -lpcap
 CXX = g++
 CXXFLAGS = -O0 -g -std=c++17
