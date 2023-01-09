@@ -19,8 +19,8 @@
     * [x] 80211-sample2.pcap
     * [x] 80211-sample3.pcap
 * https://gitlab.com/gilgil/g/-/archive/master/g-master.zip?path=bin/pcap/dot11
-    * [ ] beacon-a2000ua-testap.pcap
-    * [ ] beacon-a2000ua-testap5g.pcap
+    * [x] beacon-a2000ua-testap.pcap
+    * [x] beacon-a2000ua-testap5g.pcap
     * [x] beacon-awus051nh-testap.pcap
     * [x] beacon-awus051nh-testap5g.pcap
     * [ ] beacon-forcerecon-testap.pcap
