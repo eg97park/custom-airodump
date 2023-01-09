@@ -38,20 +38,6 @@ uint32_t RadiotapParser::get_first_present()
     return first_present;
 }
 
-/**
- * present 필드 뒤에 오는 radiotap data의 경우,
- * 크기에 따라 패딩 길이가 달라짐.
- * 
- * 만약 MAC timestamp와 같이 8bytes 크기 필드가 온다면,
- * 8bytes 단위부터 시작해야 함.
- * 예제: 80211-sample.pcap
- *  MAC timestamp -> Flags -> ...
- * 
- * 만약 Flags와 같이 4bytes 크기 필드가 온다면,
- * 4bytes 단위부터 시작해야 함.
- * 예제: 80211-sample1.pcap
- *  Flags -> ...
-*/
 std::vector<uint32_t> RadiotapParser::get_presents()
 {
     if (!this->rtap_present_vector.empty())
@@ -117,13 +103,12 @@ std::map<dot11_relem_enum, uint32_t> RadiotapParser::get_radiotap_data_map()
         if (addr_gap % relem_align != 0)
         {
             uint8_t pad_size_cand = relem_align - (addr_gap % relem_align);
-            // printf("[%s]: PADDING %d ADDED AT %d\n", cvt_enum_to_str[*it], pad_size_cand, addr_gap);
             addr_gap = addr_gap + pad_size_cand;
         }
         
-        uint32_t relem_value = 0;
+        uint64_t relem_value = 0;
         std::memcpy(&relem_value, this->pkt_addr + addr_gap, sizeof(uint8_t) * relem_size);
-        this->rtap_data_map.insert(std::pair<dot11_relem_enum, uint32_t>(*it, relem_value));
+        this->rtap_data_map.insert(std::pair<dot11_relem_enum, uint64_t>(*it, relem_value));
         addr_gap += relem_size;
 	}
 
