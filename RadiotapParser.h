@@ -1,9 +1,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstdint>
+#include <cstring>
 
 #include <vector>
 #include <map>
+
+#include <netinet/in.h>
 
 #pragma pack(1)
 
@@ -40,12 +43,86 @@ typedef enum ieee80211_radiotap_presence {
 	IEEE80211_RADIOTAP_EXT = 31
 } dot11_relem_enum;
 
-static const size_t dot11_relem_size[32] = {
-    8, 1, 1, 4, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1,
-    0,
-    3, 8, 12, 12,
-    0, 0, 0, 0, 0, 0,
-    0, 0, 0
+// enum to string
+// https://linuxhint.com/cpp-ways-to-convert-enum-to-string/
+#define enum_to_str( name ) #name
+static const char* cvt_enum_to_str[] ={
+	enum_to_str(IEEE80211_RADIOTAP_TSFT),
+	enum_to_str(IEEE80211_RADIOTAP_FLAGS),
+	enum_to_str(IEEE80211_RADIOTAP_RATE),
+	enum_to_str(IEEE80211_RADIOTAP_CHANNEL),
+	enum_to_str(IEEE80211_RADIOTAP_FHSS),
+	enum_to_str(IEEE80211_RADIOTAP_DBM_ANTSIGNAL),
+	enum_to_str(IEEE80211_RADIOTAP_DBM_ANTNOISE),
+	enum_to_str(IEEE80211_RADIOTAP_LOCK_QUALITY),
+	enum_to_str(IEEE80211_RADIOTAP_TX_ATTENUATION),
+	enum_to_str(IEEE80211_RADIOTAP_DB_TX_ATTENUATION),
+	enum_to_str(IEEE80211_RADIOTAP_DBM_TX_POWER),
+	enum_to_str(IEEE80211_RADIOTAP_ANTENNA),
+	enum_to_str(IEEE80211_RADIOTAP_DB_ANTSIGNAL),
+	enum_to_str(IEEE80211_RADIOTAP_DB_ANTNOISE),
+	enum_to_str(IEEE80211_RADIOTAP_RX_FLAGS),
+	enum_to_str(IEEE80211_RADIOTAP_TX_FLAGS),
+	enum_to_str(IEEE80211_RADIOTAP_RTS_RETRIES),
+	enum_to_str(IEEE80211_RADIOTAP_DATA_RETRIES),
+	
+	enum_to_str(IEEE80211_RADIOTAP_MCS),
+	enum_to_str(IEEE80211_RADIOTAP_AMPDU_STATUS),
+	enum_to_str(IEEE80211_RADIOTAP_VHT),
+	enum_to_str(IEEE80211_RADIOTAP_TIMESTAMP),
+	
+	enum_to_str(IEEE80211_RADIOTAP_RADIOTAP_NAMESPACE),
+	enum_to_str(IEEE80211_RADIOTAP_VENDOR_NAMESPACE),
+	enum_to_str(IEEE80211_RADIOTAP_EXT)
+};
+
+// https://github.com/radiotap/radiotap-library/blob/master/radiotap_iter.h
+typedef struct radiotap_align_size {
+	uint8_t align:4, size:4;
+} dot11_relem_align_size;
+
+// https://github.com/radiotap/radiotap-library/blob/master/radiotap.c
+// https://stackoverflow.com/questions/18731707/why-does-c11-not-support-designated-initializer-lists-as-c99
+// C99 supports designated initializer, but C++17 does not support designated initializer.
+// C++20 supports designated initializer.
+static const dot11_relem_align_size dot11_relem_get_align_size[32] = {
+    { .align = 8, .size = 8 },
+    { .align = 1, .size = 1 },
+    { .align = 1, .size = 1 },
+    { .align = 2, .size = 4 },
+    { .align = 2, .size = 2 },
+    { .align = 1, .size = 1 },
+    { .align = 1, .size = 1 },
+    { .align = 2, .size = 2 },
+    { .align = 2, .size = 2 },
+    { .align = 2, .size = 2 }, 
+    { .align = 1, .size = 1 },
+    { .align = 1, .size = 1 },
+    { .align = 1, .size = 1 },
+    { .align = 1, .size = 1 },
+    { .align = 2, .size = 2 },
+    { .align = 2, .size = 2 },
+    { .align = 1, .size = 1 },
+    { .align = 1, .size = 1 },
+
+    { .align = 0, .size = 0 },
+
+    { .align = 1, .size = 3 },
+    { .align = 4, .size = 8 },
+    { .align = 2, .size = 12 },
+    { .align = 8, .size = 12 },
+
+    { .align = 0, .size = 0 },
+    { .align = 0, .size = 0 },
+    { .align = 0, .size = 0 },
+    { .align = 0, .size = 0 },
+    { .align = 0, .size = 0 },
+    { .align = 0, .size = 0 },
+
+    
+    { .align = 0, .size = 0 },
+    { .align = 0, .size = 0 },
+    { .align = 0, .size = 0 }
 };
 
 typedef struct ieee80211_radiotap_header {
@@ -70,6 +147,12 @@ typedef struct ieee80211_wireless_management_header {
 	uint16_t capabilities_information;
 } __attribute__((__packed__)) dot11_whdr;
 
+typedef struct ieee80211_radiotap_elem_info {
+	dot11_relem_enum type;
+	uint8_t size;
+	uint8_t* value;
+} __attribute__((__packed__)) dot11_relem_info;
+
 class RadiotapParser
 {
 private:
@@ -80,7 +163,7 @@ private:
     uint8_t* hdr_pst_addr;
     uint32_t* presents;
     std::vector<uint32_t> rtap_present_vector;
-    std::map<dot11_relem_enum, uint64_t> rtap_data_map;
+    std::map<dot11_relem_enum, uint32_t> rtap_data_map;
 public:
     RadiotapParser(uint8_t* _radiotap_header_addr);
     ~RadiotapParser();
@@ -89,5 +172,5 @@ public:
     uint16_t get_header_length();
     uint32_t get_first_present();
     std::vector<uint32_t> get_presents();
-    std::map<dot11_relem_enum, uint64_t> get_radiotap_data_map();
+    std::map<dot11_relem_enum, uint32_t> get_radiotap_data_map();
 };

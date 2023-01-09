@@ -50,15 +50,9 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 
-		//printf("dump((void*)packet)\n");
-		//dump((void*)packet, rtparser.get_header_length());
 		printf("hdr_ver=%d\thdr_pad=%d\thdr_len=%d\tfirst_present=%08x\n", rtparser.get_header_version(), rtparser.get_header_padding(), rtparser.get_header_length(), rtparser.get_first_present());
 		std::vector<uint32_t> presents_vector = rtparser.get_presents();
-		for (std::vector<uint32_t>::iterator it = presents_vector.begin(); it != presents_vector.end(); it++)
-		{
-			printf("present[%ld] = %08x\n", it - presents_vector.begin(), *it);
-		}
-		rtparser.get_radiotap_data_map();
+		std::map<dot11_relem_enum, uint32_t> rtap_map = rtparser.get_radiotap_data_map();
 		
 		uint8_t* current_present = start_present;
 		while (true)
@@ -114,7 +108,7 @@ int main(int argc, char* argv[]) {
 		const uint8_t fixed_params_size = 12;
 		const uint8_t tag_number_size = 1;
 		const uint8_t tag_length_size = 1;
-		dot11_whdr* pkthdr_beacon_management_header = (dot11_whdr*)(packet + pkthdr_radiotap->it_len + sizeof(struct ieee80211_beacon_frame_header));
+		dot11_whdr* pkthdr_beacon_management_header = (dot11_whdr*)(packet + pkthdr_radiotap->it_len + sizeof(dot11_bhdr));
 		uint8_t* wireless_management_header = (uint8_t*)pkthdr_beacon_management_header;
 		uint8_t ssid_length = *(wireless_management_header + fixed_params_size + tag_number_size);
 
