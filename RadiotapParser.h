@@ -40,7 +40,7 @@ typedef enum ieee80211_radiotap_presence {
 	IEEE80211_RADIOTAP_EXT = 31
 } dot11_relem_enum;
 
-static const size_t dot11_relem_sz[32] = {
+static const size_t dot11_relem_size[32] = {
     8, 1, 1, 4, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1,
     NULL,
     3, 8, 12, 12,
@@ -79,6 +79,7 @@ private:
     uint16_t hdr_len;
     void* hdr_pst_addr;
     uint32_t* presents;
+    std::vector<uint32_t> rtap_present_vector;
     std::map<dot11_relem_enum, uint64_t> rtap_data_map;
 public:
     RadiotapParser(void* _radiotap_header_addr);

@@ -56,8 +56,9 @@ int main(int argc, char* argv[]) {
 		std::vector<uint32_t> presents_vector = rtparser.get_presents();
 		for (std::vector<uint32_t>::iterator it = presents_vector.begin(); it != presents_vector.end(); it++)
 		{
-			printf("present[%d] = %08x\n", it - presents_vector.begin(), *it);
+			printf("present[%ld] = %08x\n", it - presents_vector.begin(), *it);
 		}
+		rtparser.get_radiotap_data_map();
 		
 		void* current_present = start_present;
 		while (true)
