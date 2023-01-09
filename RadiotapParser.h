@@ -43,7 +43,7 @@ typedef enum ieee80211_radiotap_presence {
 	IEEE80211_RADIOTAP_EXT = 31
 } dot11_relem_enum;
 
-// enum to string
+// enum to string macro
 // https://linuxhint.com/cpp-ways-to-convert-enum-to-string/
 #define enum_to_str( name ) #name
 static const char* cvt_enum_to_str[] ={

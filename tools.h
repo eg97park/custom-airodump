@@ -19,4 +19,4 @@ int parse_frequency(int frequency);
 
 char* parse_mac_addr(void* p);
 
-void print_info(int frequency, char* bssid, int beacons, char* essid);
+void print_info(char* bssid, int pwr, int beacons, int ch, char* essid);

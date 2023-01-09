@@ -55,10 +55,9 @@ char* parse_mac_addr(void* p)
 	return buffer;
 }
 
-void print_info(int frequency, char* bssid, int beacons, char* essid)
+void print_info(char* bssid, int pwr, int beacons, int ch, char* essid)
 {
-	int channel = parse_frequency(frequency);
-	printf("%d\t%s\t%d\t%dGHz\t\t%s\n", channel, bssid, beacons, frequency, essid);
+	printf("%s\t%d\t%d\t%d\t%s\n", bssid, pwr, beacons, ch, essid);
 	return;
 }
 

@@ -87,8 +87,6 @@ std::map<dot11_relem_enum, uint32_t> RadiotapParser::get_radiotap_data_map()
         this->get_presents();
     }
 
-    /* Do something... */
-    // 모든 present 탐색, flag 순서 획득.
     std::vector<dot11_relem_enum> bit_sequence_vector;
 	for (std::vector<uint32_t>::iterator it = this->rtap_present_vector.begin(); it != this->rtap_present_vector.end(); it++)
 	{
@@ -98,17 +96,10 @@ std::map<dot11_relem_enum, uint32_t> RadiotapParser::get_radiotap_data_map()
             uint8_t currnet_bit = ((*it) >> i) % 2;
             if (currnet_bit == 1 && i < IEEE80211_RADIOTAP_RADIOTAP_NAMESPACE)
             {
-                //rtap_data_map_.insert(std::pair<dot11_relem_enum, uint64_t>(dot11_relem_enum(i), ));
                 bit_sequence_vector.push_back(dot11_relem_enum(i));
             }
         }
 	}
-
-    // rtap_present_vector
-    // a000402e, 00000820
-
-    // bit_sequence_vector
-    // 1, 2, 3, 5, 14, 5, 11
 
     uint8_t addr_gap = (
         sizeof(((dot11_rhdr*)nullptr)->it_version) +
@@ -118,44 +109,23 @@ std::map<dot11_relem_enum, uint32_t> RadiotapParser::get_radiotap_data_map()
         this->rtap_present_vector.size() * sizeof(uint32_t)
     );
 
-    printf("addr_gap=%d\n", addr_gap);
 	for (std::vector<dot11_relem_enum>::iterator it = bit_sequence_vector.begin(); it != bit_sequence_vector.end(); it++)
 	{
-        /*
-        index   size    addpad  todo
-        12      1       0       + (size - (index % size))
-        12      2       0       
-        12      4       0       
-        12      8       4       
-
-        13      1       0       
-        13      2       1       
-        13      4       3       
-        13      8       3       
-        */
         uint8_t relem_size = (dot11_relem_get_align_size[*it]).size;
         uint8_t relem_align = (dot11_relem_get_align_size[*it]).align;
         
         if (addr_gap % relem_align != 0)
         {
             uint8_t pad_size_cand = relem_align - (addr_gap % relem_align);
-            printf("[%s]: PADDING %d ADDED AT %d\n", cvt_enum_to_str[*it], pad_size_cand, addr_gap);
+            // printf("[%s]: PADDING %d ADDED AT %d\n", cvt_enum_to_str[*it], pad_size_cand, addr_gap);
             addr_gap = addr_gap + pad_size_cand;
         }
         
         uint32_t relem_value = 0;
         std::memcpy(&relem_value, this->pkt_addr + addr_gap, sizeof(uint8_t) * relem_size);
-        relem_value = ntohl(relem_value);
         this->rtap_data_map.insert(std::pair<dot11_relem_enum, uint32_t>(*it, relem_value));
-        printf("[%s]:[%x]\t", cvt_enum_to_str[*it], rtap_data_map.at(*it));
-        dump(this->pkt_addr + addr_gap, sizeof(uint8_t) * relem_size);
         addr_gap += relem_size;
 	}
-    
-    
-    
-    // flag 순서 별 flag 크기 획득
-    // 적절한 위치 지정.
 
     return this->rtap_data_map;
 }
