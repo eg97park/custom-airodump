@@ -52,13 +52,6 @@ int main(int argc, char* argv[]) {
 
 		std::vector<uint32_t> presents_vector = rtparser.get_presents();
 		std::map<dot11_relem_enum, uint32_t> rtap_map = rtparser.get_radiotap_data_map();
-		/*
-		for (std::map<dot11_relem_enum, uint32_t>::iterator it = rtap_map.begin(); it != rtap_map.end(); it++)
-		{
-			printf("%s=0x%x\n", cvt_enum_to_str[(*it).first], (*it).second);
-		}
-		*/
-
 
 		uint16_t channel_frequency = 0;
 		uint16_t channel_number = 0;
