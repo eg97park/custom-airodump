@@ -1,5 +1,6 @@
 #include "tools.h"
 
+// https://gitlab.com/gilgil/sns/-/wikis/byte-order/byte-order
 void dump(void* p, size_t n) {
 	uint8_t* u8 = static_cast<uint8_t*>(p);
 	size_t i = 0;
