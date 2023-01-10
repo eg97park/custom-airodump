@@ -10,6 +10,7 @@
 #include "tools.h"
 #include "RadiotapParser.h"
 
+
 int main(int argc, char* argv[]) {
 	Param param = {
 		.dev_ = NULL
@@ -24,10 +25,6 @@ int main(int argc, char* argv[]) {
 		fprintf(stderr, "pcap_open_live(%s) return null - %s\n", param.dev_, errbuf);
 		return -1;
 	}
-
-	const uint8_t fixed_params_size = 12;
-	const uint8_t tag_number_size = 1;
-	const uint8_t tag_length_size = 1;
 
 	printf("BSSID\t\t\tPWR\tCH\tFREQ\tESSID\t\t\t\t\t#BEACON\t#DATA\n");
 
@@ -89,10 +86,9 @@ int main(int argc, char* argv[]) {
 		// SSID 길이 관련 처리.
 		dot11_whdr* pkthdr_beacon_management_header = (dot11_whdr*)(packet + pkthdr_radiotap->it_len + sizeof(dot11_bhdr));
 		uint8_t* wireless_management_header = (uint8_t*)pkthdr_beacon_management_header;
-		uint8_t ssid_length = *(wireless_management_header + fixed_params_size + tag_number_size);
+		uint8_t ssid_length = *(wireless_management_header + DOT11_WLANM_FIXED_PARAM_SIZE + DOT11_WLANM_TAG_NUMBER_SIZE);
 
 		// SSID 관련 처리.
-		const int MAX_SSID_LENGTH = 32;
 		char* ssid_str = nullptr;
 		if (ssid_length != 0)
 		{
@@ -101,12 +97,12 @@ int main(int argc, char* argv[]) {
 				ssid_length = MAX_SSID_LENGTH;
 			}
 			ssid_str = (char*)malloc(sizeof(char) * ssid_length + 1);
-			memcpy(ssid_str, (char*)(wireless_management_header + fixed_params_size + tag_number_size + tag_length_size), ssid_length);
+			memcpy(ssid_str, (char*)(wireless_management_header + DOT11_WLANM_FIXED_PARAM_SIZE + DOT11_WLANM_TAG_NUMBER_SIZE + DOT11_WLANM_TAG_LENGTH_SIZE), ssid_length);
 			ssid_str[sizeof(char) * ssid_length] = '\x00';
 		}
 
 		// 정보 출력.
-		print_info(bssid_str, antenna_signal, channel_number, channel_frequency, ssid_str, beacon_count, 0);
+		print_info(bssid_str, antenna_signal, channel_number, channel_frequency, ssid_str, beacon_count, data_count);
 	}
 
 	pcap_close(pcap);

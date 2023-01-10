@@ -8,6 +8,13 @@
 
 #include <netinet/in.h>
 
+
+const size_t MAX_SSID_LENGTH = 32;
+const size_t DOT11_WLANM_FIXED_PARAM_SIZE = 12;
+const size_t DOT11_WLANM_TAG_NUMBER_SIZE = 1;
+const size_t DOT11_WLANM_TAG_LENGTH_SIZE = 1;
+
+
 #pragma pack(1)
 
 
