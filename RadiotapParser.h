@@ -103,7 +103,7 @@ static const char* cvt_enum_to_str[] ={
  */
 typedef struct radiotap_align_size {
 	uint8_t align:4, size:4;
-} dot11_relem_align_size;
+} __attribute__((__packed__)) dot11_relem_align_size;
 
 
 /**
