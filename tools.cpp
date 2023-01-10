@@ -60,6 +60,13 @@ char* parse_mac_addr(void* p)
 
 void print_info(char* bssid, int pwr, int ch, int freq, char* essid, int nbeacon, int ndata)
 {
-	printf("%s\t%ddbm\t%d\t%dGHz\t%-32s\t%d\t%d\n", bssid, pwr, ch, freq, essid, nbeacon, ndata);
+	if (freq / 1000 == 2)
+	{
+		printf("%s\t%ddbm\t%d\t2.4GHz\t%dMHz\t%-32s\t%d\t%d\n", bssid, pwr, ch, freq, essid, nbeacon, ndata);
+	}
+	else if  (freq / 1000 == 5)
+	{
+		printf("%s\t%ddbm\t%d\t5GHz\t%dMHz\t%-32s\t%d\t%d\n", bssid, pwr, ch, freq, essid, nbeacon, ndata);
+	}
 	return;
 }

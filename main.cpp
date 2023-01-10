@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	printf("BSSID\t\t\tPWR\tCH\tFREQ\tESSID\t\t\t\t\t#BEACON\t#DATA\n");
+	printf("BSSID\t\t\tPWR\tCH\tFREQ\tFREQ\tESSID\t\t\t\t\t#BEACON\t#DATA\n");
 
 	int data_count = 0;
 	int beacon_count = 0;
