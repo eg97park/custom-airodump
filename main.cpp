@@ -43,9 +43,14 @@ int main(int argc, char* argv[]) {
 
 		dot11_rhdr* pkthdr_radiotap = (dot11_rhdr*)packet;
 		dot11_bhdr* pkthdr_beacon_frame_header = (dot11_bhdr*)(packet + pkthdr_radiotap->it_len);
-		if (pkthdr_beacon_frame_header->it_frame_control_field != 0x0080){
-			// Beacon frame이 아니라면, 무시.
-			data_count++;
+		uint8_t frame_control_field_type = (uint8_t)(pkthdr_beacon_frame_header->it_frame_control_field);
+		
+		// Beacon frame 체크.
+		if (frame_control_field_type != TYPE_BEACON_FRAME){
+			// Beacon frame이 아니라면, Data frame 체크.
+			if (frame_control_field_type == TYPE_DATA_FRAME){
+				data_count++;
+			}
 			continue;
 		}
 		beacon_count++;
