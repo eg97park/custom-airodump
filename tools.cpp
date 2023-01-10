@@ -49,7 +49,7 @@ int parse_frequency(int frequency)
 }
 
 
-char* parse_mac_addr(void* p)
+char* parse_mac_addr(uint8_t* p)
 {
     uint8_t* u8 = static_cast<uint8_t*>(p);
     char* buffer = (char*)malloc(sizeof(char) * 18);
@@ -58,15 +58,45 @@ char* parse_mac_addr(void* p)
 }
 
 
-void print_info(char* bssid, int pwr, int ch, int freq, char* essid, int nbeacon, int ndata)
+void print_info(uint8_t* bssid, int pwr, int ch, int freq, char* essid, int nbeacon, int ndata)
 {
+    char* bssid_str = parse_mac_addr(bssid);
     if (freq / 1000 == 2)
     {
-        printf("%s\t%ddbm\t%d\t2.4GHz\t%dMHz\t%-32s\t%d\t%d\n", bssid, pwr, ch, freq, essid, nbeacon, ndata);
+        printf("%s\t%ddbm\t%d\t2.4GHz\t%dMHz\t%-32s\t%d\t%d\n", bssid_str, pwr, ch, freq, essid, nbeacon, ndata);
     }
-    else if  (freq / 1000 == 5)
+    else if (freq / 1000 == 5)
     {
-        printf("%s\t%ddbm\t%d\t5GHz\t%dMHz\t%-32s\t%d\t%d\n", bssid, pwr, ch, freq, essid, nbeacon, ndata);
+        printf("%s\t%ddbm\t%d\t5GHz\t%dMHz\t%-32s\t%d\t%d\n", bssid_str, pwr, ch, freq, essid, nbeacon, ndata);
     }
+    return;
+}
+
+
+void clear() {
+    std::cout << "\x1B[2J\x1B[H";
+}
+
+
+void print_info_map(std::map<uint64_t, airodump_elem> airodump_objects)
+{
+    clear();
+    const char* line = "-------------------------------------------------------------------------------------------------------------";
+    printf("%s\n", line);
+    printf("BSSID\t\t\tPWR\tCH\tFREQ\tFREQ\tESSID\t\t\t\t\t#BEACON\t#DATA\n");
+    printf("%s\n", line);
+    for (std::map<uint64_t, airodump_elem>::iterator it = airodump_objects.begin(); it != airodump_objects.end(); it++)
+    {
+        char* bssid_str = parse_mac_addr((uint8_t*)&((*it).second).bssid);
+        if ((*it).second.freq / 1000 == 2)
+        {
+            printf("%s\t%ddbm\t%d\t2.4GHz\t%dMHz\t%-32s\t%ld\t%ld\n", bssid_str, (*it).second.pwr, (*it).second.ch, (*it).second.freq, (*it).second.essid, (*it).second.beacons, (*it).second.datas);
+        }
+        else if ((*it).second.freq / 1000 == 5)
+        {
+            printf("%s\t%ddbm\t%d\t5GHz\t%dMHz\t%-32s\t%ld\t%ld\n", bssid_str, (*it).second.pwr, (*it).second.ch, (*it).second.freq, (*it).second.essid, (*it).second.beacons, (*it).second.datas);
+        }
+    }
+    printf("%s\n", line);
     return;
 }

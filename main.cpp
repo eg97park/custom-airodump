@@ -26,10 +26,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    printf("BSSID\t\t\tPWR\tCH\tFREQ\tFREQ\tESSID\t\t\t\t\t#BEACON\t#DATA\n");
-
-    int data_count = 0;
-    int beacon_count = 0;
+    std::map<uint64_t, airodump_elem> airodump_objects;
     while (true) {
         // 패킷 캡쳐.
         struct pcap_pkthdr* header;
@@ -45,15 +42,10 @@ int main(int argc, char* argv[]) {
         dot11_bhdr* pkthdr_beacon_frame_header = (dot11_bhdr*)(packet + pkthdr_radiotap->it_len);
         uint8_t frame_control_field_type = (uint8_t)(pkthdr_beacon_frame_header->it_frame_control_field);
         
-        // Beacon frame 체크.
-        if (frame_control_field_type != TYPE_BEACON_FRAME){
-            // Beacon frame이 아니라면, Data frame 체크.
-            if (frame_control_field_type == TYPE_DATA_FRAME){
-                data_count++;
-            }
+        // Beacon frame, Daa frame 체크.
+        if (frame_control_field_type != TYPE_BEACON_FRAME && frame_control_field_type != TYPE_DATA_FRAME){
             continue;
         }
-        beacon_count++;
 
         uint8_t present_count = 1;
         uint8_t* start_present = (uint8_t*)(&(pkthdr_radiotap->it_present));
@@ -85,30 +77,89 @@ int main(int argc, char* argv[]) {
             antenna_signal = rtap_map.at(IEEE80211_RADIOTAP_DBM_ANTSIGNAL);
         }
         
-        // BSSID 관련 처리.
-        char* bssid_str = parse_mac_addr(pkthdr_beacon_frame_header->it_bss_id);
-        
-        // SSID 길이 관련 처리.
-        dot11_whdr* pkthdr_beacon_management_header = (dot11_whdr*)(packet + pkthdr_radiotap->it_len + sizeof(dot11_bhdr));
-        uint8_t* wireless_management_header = (uint8_t*)pkthdr_beacon_management_header;
-        uint8_t ssid_length = *(wireless_management_header + DOT11_WLANM_FIXED_PARAM_SIZE + DOT11_WLANM_TAG_NUMBER_SIZE);
-
-        // SSID 관련 처리.
-        char* ssid_str = nullptr;
-        if (ssid_length != 0)
+        if (frame_control_field_type == TYPE_BEACON_FRAME)
         {
-            if (MAX_SSID_LENGTH < ssid_length)
+            // BSSID 관련 처리.
+            uint64_t bssid_value = 0;
+            uint8_t* bssid = pkthdr_beacon_frame_header->it_bss_id;
+            std::memcpy(&bssid_value, bssid, sizeof(uint8_t) * 6);
+            
+            // SSID 길이 관련 처리.
+            dot11_whdr* pkthdr_beacon_management_header = (dot11_whdr*)(packet + pkthdr_radiotap->it_len + sizeof(dot11_bhdr));
+            uint8_t* wireless_management_header = (uint8_t*)pkthdr_beacon_management_header;
+            uint8_t ssid_length = *(wireless_management_header + DOT11_WLANM_FIXED_PARAM_SIZE + DOT11_WLANM_TAG_NUMBER_SIZE);
+            char* ssid_str = nullptr;
+            if (ssid_length != 0)
             {
-                ssid_length = MAX_SSID_LENGTH;
+                if (MAX_SSID_LENGTH < ssid_length)
+                {
+                    ssid_length = MAX_SSID_LENGTH;
+                }
+                ssid_str = (char*)malloc(sizeof(char) * ssid_length + 1);
+                memcpy(ssid_str, (char*)(wireless_management_header + DOT11_WLANM_FIXED_PARAM_SIZE + DOT11_WLANM_TAG_NUMBER_SIZE + DOT11_WLANM_TAG_LENGTH_SIZE), ssid_length);
+                ssid_str[sizeof(char) * ssid_length] = '\x00';
             }
-            ssid_str = (char*)malloc(sizeof(char) * ssid_length + 1);
-            memcpy(ssid_str, (char*)(wireless_management_header + DOT11_WLANM_FIXED_PARAM_SIZE + DOT11_WLANM_TAG_NUMBER_SIZE + DOT11_WLANM_TAG_LENGTH_SIZE), ssid_length);
-            ssid_str[sizeof(char) * ssid_length] = '\x00';
+
+            std::map<uint64_t, airodump_elem>::iterator bssid_finder = airodump_objects.find(bssid_value);
+            if (bssid_finder != airodump_objects.end())
+            {
+                (*bssid_finder).second.pwr = antenna_signal;
+                (*bssid_finder).second.ch = channel_number;
+                (*bssid_finder).second.freq = channel_frequency;
+                (*bssid_finder).second.essid = ssid_str;
+                (*bssid_finder).second.beacons += 1;
+            }
+            else
+            {
+                airodump_elem new_airodump_elem = {
+                    .bssid = bssid_value,
+                    .pwr = antenna_signal,
+                    .ch = channel_number,
+                    .freq = channel_frequency,
+                    .essid = ssid_str,
+                    .beacons = 1,
+                    .datas = 0
+                };
+                airodump_objects.insert(
+                    std::pair<uint64_t, airodump_elem>(bssid_value, new_airodump_elem)
+                );
+            }
         }
+        else if (frame_control_field_type == TYPE_DATA_FRAME)
+        {
+            // BSSID 관련 처리.
+            dot11_dhdr* pkthdr_data_frame_header = (dot11_dhdr*)(packet + pkthdr_radiotap->it_len);
+            uint64_t bssid_value = 0;
+            uint8_t* bssid = pkthdr_data_frame_header->it_bss_id;
+            std::memcpy(&bssid_value, bssid, sizeof(uint8_t) * 6);
 
-        // 정보 출력.
-        print_info(bssid_str, antenna_signal, channel_number, channel_frequency, ssid_str, beacon_count, data_count);
+            std::map<uint64_t, airodump_elem>::iterator bssid_finder = airodump_objects.find(bssid_value);
+            if (bssid_finder != airodump_objects.end())
+            {
+                (*bssid_finder).second.pwr = antenna_signal;
+                (*bssid_finder).second.ch = channel_number;
+                (*bssid_finder).second.freq = channel_frequency;
+                (*bssid_finder).second.datas += 1;
+            }
+            else
+            {
+                airodump_elem new_airodump_elem = {
+                    .bssid = bssid_value,
+                    .pwr = antenna_signal,
+                    .ch = channel_number,
+                    .freq = channel_frequency,
+                    .essid = nullptr,
+                    .beacons = 0,
+                    .datas = 1
+                };
+                airodump_objects.insert(
+                    std::pair<uint64_t, airodump_elem>(bssid_value, new_airodump_elem)
+                );
+            }
+        }
+        
+        // 출력.
+        print_info_map(airodump_objects);
     }
-
     pcap_close(pcap);
 }

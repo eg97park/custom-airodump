@@ -3,6 +3,9 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <iostream>
+#include <map>
+
 
 /**
  * @brief 사용법을 출력하는 함수.
@@ -60,7 +63,7 @@ int parse_frequency(int frequency);
  * @param p MAC 주소 값이 있는 메모리 주소
  * @return char* MAC 주소 문자열
  */
-char* parse_mac_addr(void* p);
+char* parse_mac_addr(uint8_t* p);
 
 
 /**
@@ -74,4 +77,37 @@ char* parse_mac_addr(void* p);
  * @param nbeacon BEACON 개수
  * @param ndata DATA 개수
  */
-void print_info(char* bssid, int pwr, int ch, int freq, char* essid, int nbeacon, int ndata);
+void print_info(uint8_t* bssid, int pwr, int ch, int freq, char* essid, int nbeacon, int ndata);
+
+
+/**
+ * @brief airodump 출력용 객체의 구조체.
+ * 
+ */
+typedef struct airodump__ng_element
+{
+    uint64_t bssid;
+    int8_t pwr;
+    uint16_t ch;
+    uint16_t freq;
+    char* essid;
+    size_t beacons;
+    size_t datas;
+} __attribute__((__packed__)) airodump_elem;
+
+
+/**
+ * @brief 콘솔 지우는 함수.
+ * 
+ * @ref https://stackoverflow.com/a/6487534
+ */
+void clear();
+
+
+/**
+ * @brief airodump와 유사하게 정보를 출력하는 함수.
+ *  단, std::map<uint64_t, airodump_elem>을 순환하며 출력.
+ * 
+ * @param airodump_objects std::map of airodump_elem
+ */
+void print_info_map(std::map<uint64_t, airodump_elem> airodump_objects);

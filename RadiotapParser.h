@@ -182,13 +182,27 @@ typedef struct ieee80211_radiotap_header {
  * 
  */
 typedef struct ieee80211_beacon_frame {
-    uint16_t        it_frame_control_field;
-    uint16_t        it_duration;
-    uint8_t            it_destination_address[6];
-    uint8_t            it_source_address[6];
-    uint8_t            it_bss_id[6];
-    uint16_t        it_fragment_sequence_number;
+    uint16_t it_frame_control_field;
+    uint16_t it_duration;
+    uint8_t it_destination_address[6];
+    uint8_t it_source_address[6];
+    uint8_t it_bss_id[6];
+    uint16_t it_fragment_sequence_number;
 } __attribute__((__packed__)) dot11_bhdr;
+
+
+/**
+ * @brief data frame 구조체.
+ * 
+ */
+typedef struct ieee80211_data_frame {
+    uint16_t it_frame_control_field;
+    uint16_t it_duration;
+    uint8_t it_destination_address[6];
+    uint8_t it_bss_id[6];
+    uint8_t it_source_address[6];
+    uint16_t it_fragment_sequence_number;
+} __attribute__((__packed__)) dot11_dhdr;
 
 
 /**
