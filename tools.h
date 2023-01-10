@@ -17,7 +17,7 @@ void usage(char* argv[]);
  * 
  */
 typedef struct {
-	char* dev_;
+    char* dev_;
 } __attribute__((__packed__)) Param;
 
 

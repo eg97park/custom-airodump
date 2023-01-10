@@ -28,36 +28,36 @@ const size_t DOT11_WLANM_TAG_LENGTH_SIZE = 1;
  * @ref https://github.com/radiotap/radiotap-library/blob/master/radiotap.h
  */
 typedef enum ieee80211_radiotap_presence {
-	IEEE80211_RADIOTAP_TSFT = 0,
-	IEEE80211_RADIOTAP_FLAGS = 1,
-	IEEE80211_RADIOTAP_RATE = 2,
-	IEEE80211_RADIOTAP_CHANNEL = 3,
-	IEEE80211_RADIOTAP_FHSS = 4,
-	IEEE80211_RADIOTAP_DBM_ANTSIGNAL = 5,
-	IEEE80211_RADIOTAP_DBM_ANTNOISE = 6,
-	IEEE80211_RADIOTAP_LOCK_QUALITY = 7,
-	IEEE80211_RADIOTAP_TX_ATTENUATION = 8,
-	IEEE80211_RADIOTAP_DB_TX_ATTENUATION = 9,
-	IEEE80211_RADIOTAP_DBM_TX_POWER = 10,
-	IEEE80211_RADIOTAP_ANTENNA = 11,
-	IEEE80211_RADIOTAP_DB_ANTSIGNAL = 12,
-	IEEE80211_RADIOTAP_DB_ANTNOISE = 13,
-	IEEE80211_RADIOTAP_RX_FLAGS = 14,
-	IEEE80211_RADIOTAP_TX_FLAGS = 15,
-	IEEE80211_RADIOTAP_RTS_RETRIES = 16,
-	IEEE80211_RADIOTAP_DATA_RETRIES = 17,
-	
-	/* 18 is XChannel, but it's not defined yet */
+    IEEE80211_RADIOTAP_TSFT = 0,
+    IEEE80211_RADIOTAP_FLAGS = 1,
+    IEEE80211_RADIOTAP_RATE = 2,
+    IEEE80211_RADIOTAP_CHANNEL = 3,
+    IEEE80211_RADIOTAP_FHSS = 4,
+    IEEE80211_RADIOTAP_DBM_ANTSIGNAL = 5,
+    IEEE80211_RADIOTAP_DBM_ANTNOISE = 6,
+    IEEE80211_RADIOTAP_LOCK_QUALITY = 7,
+    IEEE80211_RADIOTAP_TX_ATTENUATION = 8,
+    IEEE80211_RADIOTAP_DB_TX_ATTENUATION = 9,
+    IEEE80211_RADIOTAP_DBM_TX_POWER = 10,
+    IEEE80211_RADIOTAP_ANTENNA = 11,
+    IEEE80211_RADIOTAP_DB_ANTSIGNAL = 12,
+    IEEE80211_RADIOTAP_DB_ANTNOISE = 13,
+    IEEE80211_RADIOTAP_RX_FLAGS = 14,
+    IEEE80211_RADIOTAP_TX_FLAGS = 15,
+    IEEE80211_RADIOTAP_RTS_RETRIES = 16,
+    IEEE80211_RADIOTAP_DATA_RETRIES = 17,
     
-	IEEE80211_RADIOTAP_MCS = 19,
-	IEEE80211_RADIOTAP_AMPDU_STATUS = 20,
-	IEEE80211_RADIOTAP_VHT = 21,
-	IEEE80211_RADIOTAP_TIMESTAMP = 22,
+    /* 18 is XChannel, but it's not defined yet */
+    
+    IEEE80211_RADIOTAP_MCS = 19,
+    IEEE80211_RADIOTAP_AMPDU_STATUS = 20,
+    IEEE80211_RADIOTAP_VHT = 21,
+    IEEE80211_RADIOTAP_TIMESTAMP = 22,
 
-	/* valid in every it_present bitmap, even vendor namespaces */
-	IEEE80211_RADIOTAP_RADIOTAP_NAMESPACE = 29,
-	IEEE80211_RADIOTAP_VENDOR_NAMESPACE = 30,
-	IEEE80211_RADIOTAP_EXT = 31
+    /* valid in every it_present bitmap, even vendor namespaces */
+    IEEE80211_RADIOTAP_RADIOTAP_NAMESPACE = 29,
+    IEEE80211_RADIOTAP_VENDOR_NAMESPACE = 30,
+    IEEE80211_RADIOTAP_EXT = 31
 } dot11_relem_enum;
 
 
@@ -68,31 +68,31 @@ typedef enum ieee80211_radiotap_presence {
  */
 #define enum_to_str( name ) #name
 static const char* cvt_enum_to_str[] ={
-	enum_to_str(IEEE80211_RADIOTAP_TSFT),
-	enum_to_str(IEEE80211_RADIOTAP_FLAGS),
-	enum_to_str(IEEE80211_RADIOTAP_RATE),
-	enum_to_str(IEEE80211_RADIOTAP_CHANNEL),
-	enum_to_str(IEEE80211_RADIOTAP_FHSS),
-	enum_to_str(IEEE80211_RADIOTAP_DBM_ANTSIGNAL),
-	enum_to_str(IEEE80211_RADIOTAP_DBM_ANTNOISE),
-	enum_to_str(IEEE80211_RADIOTAP_LOCK_QUALITY),
-	enum_to_str(IEEE80211_RADIOTAP_TX_ATTENUATION),
-	enum_to_str(IEEE80211_RADIOTAP_DB_TX_ATTENUATION),
-	enum_to_str(IEEE80211_RADIOTAP_DBM_TX_POWER),
-	enum_to_str(IEEE80211_RADIOTAP_ANTENNA),
-	enum_to_str(IEEE80211_RADIOTAP_DB_ANTSIGNAL),
-	enum_to_str(IEEE80211_RADIOTAP_DB_ANTNOISE),
-	enum_to_str(IEEE80211_RADIOTAP_RX_FLAGS),
-	enum_to_str(IEEE80211_RADIOTAP_TX_FLAGS),
-	enum_to_str(IEEE80211_RADIOTAP_RTS_RETRIES),
-	enum_to_str(IEEE80211_RADIOTAP_DATA_RETRIES),
+    enum_to_str(IEEE80211_RADIOTAP_TSFT),
+    enum_to_str(IEEE80211_RADIOTAP_FLAGS),
+    enum_to_str(IEEE80211_RADIOTAP_RATE),
+    enum_to_str(IEEE80211_RADIOTAP_CHANNEL),
+    enum_to_str(IEEE80211_RADIOTAP_FHSS),
+    enum_to_str(IEEE80211_RADIOTAP_DBM_ANTSIGNAL),
+    enum_to_str(IEEE80211_RADIOTAP_DBM_ANTNOISE),
+    enum_to_str(IEEE80211_RADIOTAP_LOCK_QUALITY),
+    enum_to_str(IEEE80211_RADIOTAP_TX_ATTENUATION),
+    enum_to_str(IEEE80211_RADIOTAP_DB_TX_ATTENUATION),
+    enum_to_str(IEEE80211_RADIOTAP_DBM_TX_POWER),
+    enum_to_str(IEEE80211_RADIOTAP_ANTENNA),
+    enum_to_str(IEEE80211_RADIOTAP_DB_ANTSIGNAL),
+    enum_to_str(IEEE80211_RADIOTAP_DB_ANTNOISE),
+    enum_to_str(IEEE80211_RADIOTAP_RX_FLAGS),
+    enum_to_str(IEEE80211_RADIOTAP_TX_FLAGS),
+    enum_to_str(IEEE80211_RADIOTAP_RTS_RETRIES),
+    enum_to_str(IEEE80211_RADIOTAP_DATA_RETRIES),
 
     "NOT_IMPLEMENTED_PLUS_CHANNEL",
-	
-	enum_to_str(IEEE80211_RADIOTAP_MCS),
-	enum_to_str(IEEE80211_RADIOTAP_AMPDU_STATUS),
-	enum_to_str(IEEE80211_RADIOTAP_VHT),
-	enum_to_str(IEEE80211_RADIOTAP_TIMESTAMP),
+    
+    enum_to_str(IEEE80211_RADIOTAP_MCS),
+    enum_to_str(IEEE80211_RADIOTAP_AMPDU_STATUS),
+    enum_to_str(IEEE80211_RADIOTAP_VHT),
+    enum_to_str(IEEE80211_RADIOTAP_TIMESTAMP),
 
     "NOT_IMPLEMENTED_HE_INFORMATION",
     "NOT_IMPLEMENTED_HE__MU_INFORMATION",
@@ -100,10 +100,10 @@ static const char* cvt_enum_to_str[] ={
     "NOT_IMPLEMENTED_0_LENGTH_PSDU",
     "NOT_IMPLEMENTED_L_SIG",
     "NOT_IMPLEMENTED_TLVS",
-	
-	enum_to_str(IEEE80211_RADIOTAP_RADIOTAP_NAMESPACE),
-	enum_to_str(IEEE80211_RADIOTAP_VENDOR_NAMESPACE),
-	enum_to_str(IEEE80211_RADIOTAP_EXT)
+    
+    enum_to_str(IEEE80211_RADIOTAP_RADIOTAP_NAMESPACE),
+    enum_to_str(IEEE80211_RADIOTAP_VENDOR_NAMESPACE),
+    enum_to_str(IEEE80211_RADIOTAP_EXT)
 };
 
 
@@ -113,7 +113,7 @@ static const char* cvt_enum_to_str[] ={
  * @ref https://github.com/radiotap/radiotap-library/blob/master/radiotap_iter.h
  */
 typedef struct radiotap_align_size {
-	uint8_t align:4, size:4;
+    uint8_t align:4, size:4;
 } __attribute__((__packed__)) dot11_relem_align_size;
 
 
@@ -182,12 +182,12 @@ typedef struct ieee80211_radiotap_header {
  * 
  */
 typedef struct ieee80211_beacon_frame {
-    uint16_t		it_frame_control_field;
-    uint16_t		it_duration;
-    uint8_t			it_destination_address[6];
-    uint8_t			it_source_address[6];
-    uint8_t			it_bss_id[6];
-    uint16_t		it_fragment_sequence_number;
+    uint16_t        it_frame_control_field;
+    uint16_t        it_duration;
+    uint8_t            it_destination_address[6];
+    uint8_t            it_source_address[6];
+    uint8_t            it_bss_id[6];
+    uint16_t        it_fragment_sequence_number;
 } __attribute__((__packed__)) dot11_bhdr;
 
 
@@ -196,9 +196,9 @@ typedef struct ieee80211_beacon_frame {
  * 
  */
 typedef struct ieee80211_wireless_management_header {
-	uint64_t timestamp;
-	uint16_t beacon_interval;
-	uint16_t capabilities_information;
+    uint64_t timestamp;
+    uint16_t beacon_interval;
+    uint16_t capabilities_information;
 } __attribute__((__packed__)) dot11_whdr;
 
 

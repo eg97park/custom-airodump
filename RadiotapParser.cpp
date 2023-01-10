@@ -80,8 +80,8 @@ std::map<dot11_relem_enum, uint32_t> RadiotapParser::get_radiotap_data_map()
     }
 
     std::vector<dot11_relem_enum> bit_sequence_vector;
-	for (std::vector<uint32_t>::iterator it = this->rtap_present_vector.begin(); it != this->rtap_present_vector.end(); it++)
-	{
+    for (std::vector<uint32_t>::iterator it = this->rtap_present_vector.begin(); it != this->rtap_present_vector.end(); it++)
+    {
         uint32_t curent_present = *it;
         for (size_t i = IEEE80211_RADIOTAP_TSFT; i < IEEE80211_RADIOTAP_EXT + 1; i++)
         {
@@ -91,7 +91,7 @@ std::map<dot11_relem_enum, uint32_t> RadiotapParser::get_radiotap_data_map()
                 bit_sequence_vector.push_back(dot11_relem_enum(i));
             }
         }
-	}
+    }
 
     uint8_t addr_gap = (
         sizeof(((dot11_rhdr*)nullptr)->it_version) +
@@ -101,8 +101,8 @@ std::map<dot11_relem_enum, uint32_t> RadiotapParser::get_radiotap_data_map()
         this->rtap_present_vector.size() * sizeof(uint32_t)
     );
 
-	for (std::vector<dot11_relem_enum>::iterator it = bit_sequence_vector.begin(); it != bit_sequence_vector.end(); it++)
-	{
+    for (std::vector<dot11_relem_enum>::iterator it = bit_sequence_vector.begin(); it != bit_sequence_vector.end(); it++)
+    {
         uint8_t relem_size = (dot11_relem_get_align_size[*it]).size;
         uint8_t relem_align = (dot11_relem_get_align_size[*it]).align;
         
@@ -116,7 +116,7 @@ std::map<dot11_relem_enum, uint32_t> RadiotapParser::get_radiotap_data_map()
         std::memcpy(&relem_value, this->pkt_addr + addr_gap, sizeof(uint8_t) * relem_size);
         this->rtap_data_map.insert(std::pair<dot11_relem_enum, uint64_t>(*it, relem_value));
         addr_gap += relem_size;
-	}
+    }
 
     return this->rtap_data_map;
 }
