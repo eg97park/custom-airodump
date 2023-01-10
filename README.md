@@ -7,7 +7,7 @@
         * [x] BEACONS
         * [x] CH
         * [x] ESSID
-        * [ ] #DATA
+        * [x] #DATA
         * [ ] ENC
     * 기능
         * [x] messed radiotap data(present)
