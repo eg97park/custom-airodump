@@ -29,9 +29,10 @@ int main(int argc, char* argv[]) {
 	const uint8_t tag_number_size = 1;
 	const uint8_t tag_length_size = 1;
 
-	printf("BSSID\t\t\tPWR\tBEACONS\tCH\tFREQ\tESSID\n");
+	printf("BSSID\t\t\tPWR\tCH\tFREQ\tESSID\t\t\t\t\t#BEACON\t#DATA\n");
 
-	int beacon_count = 1;
+	int data_count = 0;
+	int beacon_count = 0;
 	while (true) {
 		// 패킷 캡쳐.
 		struct pcap_pkthdr* header;
@@ -47,8 +48,10 @@ int main(int argc, char* argv[]) {
 		dot11_bhdr* pkthdr_beacon_frame_header = (dot11_bhdr*)(packet + pkthdr_radiotap->it_len);
 		if (pkthdr_beacon_frame_header->it_frame_control_field != 0x0080){
 			// Beacon frame이 아니라면, 무시.
+			data_count++;
 			continue;
 		}
+		beacon_count++;
 
 		uint8_t present_count = 1;
 		uint8_t* start_present = (uint8_t*)(&(pkthdr_radiotap->it_present));
@@ -89,16 +92,21 @@ int main(int argc, char* argv[]) {
 		uint8_t ssid_length = *(wireless_management_header + fixed_params_size + tag_number_size);
 
 		// SSID 관련 처리.
+		const int MAX_SSID_LENGTH = 32;
 		char* ssid_str = nullptr;
 		if (ssid_length != 0)
 		{
-			ssid_str = (char*)malloc(sizeof(char) * ssid_length);
+			if (MAX_SSID_LENGTH < ssid_length)
+			{
+				ssid_length = MAX_SSID_LENGTH;
+			}
+			ssid_str = (char*)malloc(sizeof(char) * ssid_length + 1);
 			memcpy(ssid_str, (char*)(wireless_management_header + fixed_params_size + tag_number_size + tag_length_size), ssid_length);
+			ssid_str[sizeof(char) * ssid_length] = '\x00';
 		}
 
 		// 정보 출력.
-		print_info(bssid_str, antenna_signal, beacon_count, channel_number, channel_frequency, ssid_str);
-		beacon_count++;
+		print_info(bssid_str, antenna_signal, channel_number, channel_frequency, ssid_str, beacon_count, 0);
 	}
 
 	pcap_close(pcap);
