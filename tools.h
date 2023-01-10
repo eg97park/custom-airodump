@@ -68,9 +68,10 @@ char* parse_mac_addr(void* p);
  * 
  * @param bssid BSSID
  * @param pwr POWER
- * @param beacons BEACON 개수
  * @param ch 채널
  * @param freq 주파수
  * @param essid ESSID
+ * @param nbeacon BEACON 개수
+ * @param ndata DATA 개수
  */
-void print_info(char* bssid, int pwr, int beacons, int ch, int freq, char* essid);
+void print_info(char* bssid, int pwr, int ch, int freq, char* essid, int nbeacon, int ndata);

@@ -58,8 +58,8 @@ char* parse_mac_addr(void* p)
 }
 
 
-void print_info(char* bssid, int pwr, int beacons, int ch, int freq, char* essid)
+void print_info(char* bssid, int pwr, int ch, int freq, char* essid, int nbeacon, int ndata)
 {
-	printf("%s\t%ddbm\t%d\t%d\t%dGHz\t%s\n", bssid, pwr, beacons, ch, freq, essid);
+	printf("%s\t%ddbm\t%d\t%dGHz\t%-32s\t%d\t%d\n", bssid, pwr, ch, freq, essid, nbeacon, ndata);
 	return;
 }
